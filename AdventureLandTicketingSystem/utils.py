@@ -1,6 +1,6 @@
 import re
 import uuid
-from datetime import date
+from datetime import date, datetime
 
 class Utils:
     @staticmethod
@@ -49,3 +49,17 @@ class Utils:
         :return: Today's date as a string.
         """
         return date.today().isoformat()
+    
+    @staticmethod
+    def validate_date(input_date):
+        """
+        Validate the format of a date and ensure it is not in the past.
+        :param input_date: The input date as a string in YYYY-MM-DD format.
+        :return: True if valid and not in the past, False otherwise.
+        """
+        try:
+            date_obj = datetime.strptime(input_date, "%Y-%m-%d")
+            today = datetime.now().date()
+            return date_obj.date() >= today
+        except ValueError:
+            return False    

@@ -24,16 +24,23 @@ class User:
         """
         return self.email == email and self.password == password
 
+    def load_purchase_history(self, history):
+        updated_history = []
+        for ticket in history:
+            if not hasattr(ticket, "visit_date"):
+                ticket.visit_date = "Unknown"
+            updated_history.append(ticket)
+        self.purchase_history = updated_history
+
     def view_purchase_history(self):
-        """
-        Display purchased tickets.
-        """
         if not self.purchase_history:
             print("No tickets purchased yet.")
-        else:
-            print("Purchase History:")
-            for ticket in self.purchase_history:
-                print(ticket)
+            return
+        print("\nPurchase History:")
+        for ticket in self.purchase_history:
+            visit_date = getattr(ticket, "visit_date", "Unknown")
+            print(f"{ticket.ticket_type} - Price: {ticket.price} DHS, "
+                f"Validity: {ticket.validity}, Visit Date: {visit_date}")
 
     def purchase_ticket(self, ticket):
         """
