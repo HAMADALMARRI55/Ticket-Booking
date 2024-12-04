@@ -1,7 +1,16 @@
-# gui.py
+"""
+GUI Module for the Adventure Land Theme Park Ticketing System.
+
+This module creates a graphical user interface using Tkinter for users and admins
+to interact with the ticketing system. It allows users to create accounts, log in,
+purchase tickets, and view their purchase history. Admins can log in to view sales
+reports and manage discounts.
+"""
+
+
 
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 from tkinter import scrolledtext
 from data_storage import DataStorage
 from constants import FILE_PATH_USERS, FILE_PATH_TICKETS, FILE_PATH_SALES_REPORTS
@@ -17,59 +26,90 @@ users = DataStorage.load_from_file(FILE_PATH_USERS)
 tickets = DataStorage.load_from_file(FILE_PATH_TICKETS)
 sales_reports = DataStorage.load_from_file(FILE_PATH_SALES_REPORTS)
 
-# Ensure all SalesReport objects have the 'transactions' attribute
+# SalesReport objects have the 'transactions' attribute
 if sales_reports:
     for report in sales_reports.values():
         if not hasattr(report, 'transactions'):
             report.transactions = []
 
 class TicketingApp:
+    """
+    The main GUI application class for the Adventure Land Theme Park Ticketing System.
+
+    This class initializes the main window and handles all GUI-related functionalities,
+    including user registration, login, ticket purchasing, and admin operations.
+    """
     def __init__(self, root):
+        """Initialize the application window and set up styles."""
         self.root = root
-        self.root.title("Adventure Land Theme Park Ticketing System")
-        self.root.geometry("600x600")
-        self.current_user = None  # To keep track of the logged-in user
+        self.root.title("Adventure Land Theme Park")
+        self.root.geometry("700x700")
+        self.root.configure(bg='#F0F4F8')
+
+        # Custom style
+        self.style = ttk.Style()
+        self.style.theme_use('clam')
+
+        # Configure styles
+        self.style.configure('TButton',
+                             font=('Helvetica', 10))
+        self.style.configure('TLabel',
+                             font=('Helvetica', 12))
+        self.style.configure('Header.TLabel',
+                             font=('Arial', 16))
+        self.style.configure('TFrame',
+                             background='#F0F4F8')
+        self.style.configure('Treeview',
+                             font=('Helvetica', 10))
+        self.style.configure('Treeview.Heading',
+                             font=('Helvetica', 10, 'bold'))
+
+        self.current_user = None
         self.create_welcome_frame()
 
     def create_welcome_frame(self):
+        """Create the welcome frame with options to login, create an account, or admin login."""
         self.clear_frames()
-        self.welcome_frame = tk.Frame(self.root)
+        self.welcome_frame = ttk.Frame(self.root)
         self.welcome_frame.pack(fill=tk.BOTH, expand=True)
 
-        tk.Label(self.welcome_frame, text="Welcome to Adventure Land Theme Park", font=("Arial", 16)).pack(pady=20)
+        ttk.Label(self.welcome_frame, text="Welcome to Adventure Land Theme Park", style='Header.TLabel').pack(pady=20)
 
-        tk.Button(self.welcome_frame, text="Login", command=self.create_login_frame, width=20).pack(pady=10)
-        tk.Button(self.welcome_frame, text="Create Account", command=self.create_account_frame, width=20).pack(pady=10)
-        tk.Button(self.welcome_frame, text="Admin Login", command=self.create_admin_login_frame, width=20).pack(pady=10)
-        tk.Button(self.welcome_frame, text="Exit", command=self.root.quit, width=20).pack(pady=10)
+        ttk.Button(self.welcome_frame, text="Login", command=self.create_login_frame, width=20).pack(pady=10)
+        ttk.Button(self.welcome_frame, text="Create Account", command=self.create_account_frame, width=20).pack(pady=10)
+        ttk.Button(self.welcome_frame, text="Admin Login", command=self.create_admin_login_frame, width=20).pack(pady=10)
+        ttk.Button(self.welcome_frame, text="Exit", command=self.root.quit, width=20).pack(pady=10)
 
     def clear_frames(self):
+        """Clear all frames from the root window."""
         for widget in self.root.winfo_children():
             widget.destroy()
 
     def create_account_frame(self):
+        """Display the account creation frame for new users to sign up."""
         self.clear_frames()
-        self.account_frame = tk.Frame(self.root)
+        self.account_frame = ttk.Frame(self.root)
         self.account_frame.pack(fill=tk.BOTH, expand=True)
 
-        tk.Label(self.account_frame, text="Create a New Account", font=("Arial", 16)).pack(pady=20)
+        ttk.Label(self.account_frame, text="Create a New Account", style='Header.TLabel').pack(pady=20)
 
-        tk.Label(self.account_frame, text="Name:").pack(pady=5)
-        self.name_entry = tk.Entry(self.account_frame)
+        ttk.Label(self.account_frame, text="Name:").pack(pady=5)
+        self.name_entry = ttk.Entry(self.account_frame)
         self.name_entry.pack()
 
-        tk.Label(self.account_frame, text="Email:").pack(pady=5)
-        self.email_entry = tk.Entry(self.account_frame)
+        ttk.Label(self.account_frame, text="Email:").pack(pady=5)
+        self.email_entry = ttk.Entry(self.account_frame)
         self.email_entry.pack()
 
-        tk.Label(self.account_frame, text="Password:").pack(pady=5)
-        self.password_entry = tk.Entry(self.account_frame, show="*")
+        ttk.Label(self.account_frame, text="Password:").pack(pady=5)
+        self.password_entry = ttk.Entry(self.account_frame, show="*")
         self.password_entry.pack()
 
-        tk.Button(self.account_frame, text="Create Account", command=self.create_account).pack(pady=10)
-        tk.Button(self.account_frame, text="Back", command=self.create_welcome_frame).pack()
+        ttk.Button(self.account_frame, text="Create Account", command=self.create_account).pack(pady=10)
+        ttk.Button(self.account_frame, text="Back", command=self.create_welcome_frame).pack()
 
     def create_account(self):
+        """Handle the creation of a new user account after validating inputs."""
         name = self.name_entry.get()
         email = self.email_entry.get()
         password = self.password_entry.get()
@@ -90,24 +130,26 @@ class TicketingApp:
         self.create_login_frame()
 
     def create_login_frame(self):
+        """Display the login frame for existing users to sign in."""
         self.clear_frames()
-        self.login_frame = tk.Frame(self.root)
+        self.login_frame = ttk.Frame(self.root)
         self.login_frame.pack(fill=tk.BOTH, expand=True)
 
-        tk.Label(self.login_frame, text="User Login", font=("Arial", 16)).pack(pady=20)
+        ttk.Label(self.login_frame, text="User Login", style='Header.TLabel').pack(pady=20)
 
-        tk.Label(self.login_frame, text="Email:").pack(pady=5)
-        self.login_email_entry = tk.Entry(self.login_frame)
+        ttk.Label(self.login_frame, text="Email:").pack(pady=5)
+        self.login_email_entry = ttk.Entry(self.login_frame)
         self.login_email_entry.pack()
 
-        tk.Label(self.login_frame, text="Password:").pack(pady=5)
-        self.login_password_entry = tk.Entry(self.login_frame, show="*")
+        ttk.Label(self.login_frame, text="Password:").pack(pady=5)
+        self.login_password_entry = ttk.Entry(self.login_frame, show="*")
         self.login_password_entry.pack()
 
-        tk.Button(self.login_frame, text="Login", command=self.user_login).pack(pady=10)
-        tk.Button(self.login_frame, text="Back", command=self.create_welcome_frame).pack()
+        ttk.Button(self.login_frame, text="Login", command=self.user_login).pack(pady=10)
+        ttk.Button(self.login_frame, text="Back", command=self.create_welcome_frame).pack()
 
     def user_login(self):
+        """Handle the login process for existing users after validating inputs."""
         email = self.login_email_entry.get()
         password = self.login_password_entry.get()
 
@@ -121,78 +163,98 @@ class TicketingApp:
             messagebox.showerror("Error", "Invalid email or password!")
 
     def create_user_dashboard(self):
+        """Display the user dashboard with their purchase history."""
         self.clear_frames()
-        self.user_dashboard = tk.Frame(self.root)
+        self.user_dashboard = ttk.Frame(self.root)
         self.user_dashboard.pack(fill=tk.BOTH, expand=True)
 
-        tk.Label(self.user_dashboard, text=f"Welcome, {self.current_user.name}", font=("Arial", 16)).pack(pady=20)
+        ttk.Label(self.user_dashboard, text=f"Welcome, {self.current_user.name}", style='Header.TLabel').pack(pady=20)
 
-        tk.Button(self.user_dashboard, text="View Purchase History", command=self.view_purchase_history, width=25).pack(pady=10)
-        tk.Button(self.user_dashboard, text="Purchase Ticket", command=self.create_purchase_frame, width=25).pack(pady=10)
-        tk.Button(self.user_dashboard, text="Logout", command=self.logout, width=25).pack(pady=10)
+        ttk.Button(self.user_dashboard, text="View Purchase History", command=self.view_purchase_history, width=25).pack(pady=10)
+        ttk.Button(self.user_dashboard, text="Purchase Ticket", command=self.create_purchase_frame, width=25).pack(pady=10)
+        ttk.Button(self.user_dashboard, text="Logout", command=self.logout, width=25).pack(pady=10)
 
     def logout(self):
+        """Clear the current user and display the welcome frame again."""
         self.current_user = None
         self.create_welcome_frame()
 
     def view_purchase_history(self):
+        """Display the user's purchase history in a new frame."""
         self.clear_frames()
-        self.history_frame = tk.Frame(self.root)
+        self.history_frame = ttk.Frame(self.root)
         self.history_frame.pack(fill=tk.BOTH, expand=True)
 
-        tk.Label(self.history_frame, text="Purchase History", font=("Arial", 16)).pack(pady=20)
+        ttk.Label(self.history_frame, text="Purchase History", style='Header.TLabel').pack(pady=20)
 
         if not self.current_user.purchase_history:
-            tk.Label(self.history_frame, text="No tickets purchased yet.").pack()
+            ttk.Label(self.history_frame, text="No tickets purchased yet.").pack()
         else:
-            history_text = scrolledtext.ScrolledText(self.history_frame, width=70, height=20)
-            history_text.pack()
-            for ticket in self.current_user.purchase_history:
-                ticket_info = (
-                    f"Ticket ID: {ticket.ticket_id}\n"
-                    f"Ticket Type: {ticket.ticket_type}\n"
-                    f"Price: {ticket.price} DHS\n"
-                    f"Validity: From {ticket.validity_start_date} to {ticket.validity_end_date}\n"
-                    f"Visit Date: {ticket.visit_date}\n"
-                    f"Discount Applied: {ticket.discount * 100}%\n"
-                    "----------------------------------------\n"
-                )
-                history_text.insert(tk.END, ticket_info)
-            history_text.configure(state='disabled')
+            columns = ('ticket_id', 'ticket_type', 'price', 'validity', 'visit_date', 'discount')
+            tree = ttk.Treeview(self.history_frame, columns=columns, show='headings')
+            tree.pack(fill=tk.BOTH, expand=True)
 
-        tk.Button(self.history_frame, text="Back", command=self.create_user_dashboard).pack(pady=10)
+            tree.heading('ticket_id', text='Ticket ID')
+            tree.heading('ticket_type', text='Ticket Type')
+            tree.heading('price', text='Price (DHS)')
+            tree.heading('validity', text='Validity')
+            tree.heading('visit_date', text='Visit Date')
+            tree.heading('discount', text='Discount Applied')
+
+            for ticket in self.current_user.purchase_history:
+                validity = f"From {ticket.validity_start_date} to {ticket.validity_end_date}"
+                discount_percentage = f"{ticket.discount * 100}%"
+                tree.insert('', tk.END, values=(
+                    ticket.ticket_id,
+                    ticket.ticket_type,
+                    ticket.price,
+                    validity,
+                    ticket.visit_date,
+                    discount_percentage
+                ))
+
+            # Add vertical scrollbar
+            scrollbar = ttk.Scrollbar(self.history_frame, orient=tk.VERTICAL, command=tree.yview)
+            tree.configure(yscroll=scrollbar.set)
+            scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        ttk.Button(self.history_frame, text="Back", command=self.create_user_dashboard).pack(pady=10)
 
     def create_purchase_frame(self):
+        """Create a frame for purchasing tickets."""
         self.clear_frames()
-        self.purchase_frame = tk.Frame(self.root)
+        self.purchase_frame = ttk.Frame(self.root)
         self.purchase_frame.pack(fill=tk.BOTH, expand=True)
 
-        tk.Label(self.purchase_frame, text="Purchase Ticket", font=("Arial", 16)).pack(pady=20)
+        ttk.Label(self.purchase_frame, text="Purchase Ticket", style='Header.TLabel').pack(pady=20)
 
-        tk.Label(self.purchase_frame, text="Select Ticket Type:").pack(pady=5)
-        self.ticket_var = tk.StringVar(self.purchase_frame)
-        self.ticket_var.set("Select Ticket")
+        ttk.Label(self.purchase_frame, text="Select Ticket Type:").pack(pady=5)
         ticket_options = list(tickets.keys())
-        tk.OptionMenu(self.purchase_frame, self.ticket_var, *ticket_options).pack()
+        self.ticket_var = tk.StringVar()
+        self.ticket_combobox = ttk.Combobox(self.purchase_frame, textvariable=self.ticket_var, values=ticket_options, state='readonly')
+        self.ticket_combobox.set("Select Ticket")
+        self.ticket_combobox.pack()
 
-        tk.Label(self.purchase_frame, text="Visit Date (YYYY-MM-DD):").pack(pady=5)
-        self.visit_date_entry = tk.Entry(self.purchase_frame)
+        ttk.Label(self.purchase_frame, text="Visit Date (YYYY-MM-DD):").pack(pady=5)
+        self.visit_date_entry = ttk.Entry(self.purchase_frame)
         self.visit_date_entry.pack()
 
-        tk.Label(self.purchase_frame, text="Number of Tickets:").pack(pady=5)
-        self.num_tickets_entry = tk.Entry(self.purchase_frame)
+        ttk.Label(self.purchase_frame, text="Number of Tickets:").pack(pady=5)
+        self.num_tickets_entry = ttk.Entry(self.purchase_frame)
         self.num_tickets_entry.pack()
 
-        tk.Label(self.purchase_frame, text="Select Payment Method:").pack(pady=5)
-        self.payment_var = tk.StringVar(self.purchase_frame)
-        self.payment_var.set("Select Payment Method")
+        ttk.Label(self.purchase_frame, text="Select Payment Method:").pack(pady=5)
         payment_methods = ["Net Banking", "Credit Card", "Digital Wallet", "Cash", "Coupon"]
-        tk.OptionMenu(self.purchase_frame, self.payment_var, *payment_methods).pack()
+        self.payment_var = tk.StringVar()
+        self.payment_combobox = ttk.Combobox(self.purchase_frame, textvariable=self.payment_var, values=payment_methods, state='readonly')
+        self.payment_combobox.set("Select Payment Method")
+        self.payment_combobox.pack()
 
-        tk.Button(self.purchase_frame, text="Purchase", command=self.purchase_ticket).pack(pady=10)
-        tk.Button(self.purchase_frame, text="Back", command=self.create_user_dashboard).pack()
+        ttk.Button(self.purchase_frame, text="Purchase", command=self.purchase_ticket).pack(pady=10)
+        ttk.Button(self.purchase_frame, text="Back", command=self.create_user_dashboard).pack()
 
     def purchase_ticket(self):
+        """Purchase a ticket based on user input."""
         ticket_type = self.ticket_var.get()
         visit_date = self.visit_date_entry.get()
         num_tickets = self.num_tickets_entry.get()
@@ -218,7 +280,7 @@ class TicketingApp:
 
         try:
             ticket_info = tickets.get(ticket_type)
-            adult_present = True  # Assume adult is present for simplicity
+            adult_present = True  
 
             # For Child Ticket, ensure an adult ticket is purchased
             if ticket_type == "Child Ticket":
@@ -306,24 +368,26 @@ class TicketingApp:
             messagebox.showerror("Error", str(e))
 
     def create_admin_login_frame(self):
+        """Display the admin login frame for admin authentication."""
         self.clear_frames()
-        self.admin_login_frame = tk.Frame(self.root)
+        self.admin_login_frame = ttk.Frame(self.root)
         self.admin_login_frame.pack(fill=tk.BOTH, expand=True)
 
-        tk.Label(self.admin_login_frame, text="Admin Login", font=("Arial", 16)).pack(pady=20)
+        ttk.Label(self.admin_login_frame, text="Admin Login", style='Header.TLabel').pack(pady=20)
 
-        tk.Label(self.admin_login_frame, text="Email:").pack(pady=5)
-        self.admin_email_entry = tk.Entry(self.admin_login_frame)
+        ttk.Label(self.admin_login_frame, text="Email:").pack(pady=5)
+        self.admin_email_entry = ttk.Entry(self.admin_login_frame)
         self.admin_email_entry.pack()
 
-        tk.Label(self.admin_login_frame, text="Password:").pack(pady=5)
-        self.admin_password_entry = tk.Entry(self.admin_login_frame, show="*")
+        ttk.Label(self.admin_login_frame, text="Password:").pack(pady=5)
+        self.admin_password_entry = ttk.Entry(self.admin_login_frame, show="*")
         self.admin_password_entry.pack()
 
-        tk.Button(self.admin_login_frame, text="Login", command=self.admin_login).pack(pady=10)
-        tk.Button(self.admin_login_frame, text="Back", command=self.create_welcome_frame).pack()
+        ttk.Button(self.admin_login_frame, text="Login", command=self.admin_login).pack(pady=10)
+        ttk.Button(self.admin_login_frame, text="Back", command=self.create_welcome_frame).pack()
 
     def admin_login(self):
+        """Authenticate admin user and display admin dashboard if successful."""
         email = self.admin_email_entry.get()
         password = self.admin_password_entry.get()
         if email == "admin@adventureland.com" and password == "admin123":
@@ -333,55 +397,84 @@ class TicketingApp:
             messagebox.showerror("Error", "Invalid admin credentials!")
 
     def create_admin_dashboard(self):
+        """Display the admin dashboard for admin to manage users and tickets."""
         self.clear_frames()
-        self.admin_dashboard = tk.Frame(self.root)
+        self.admin_dashboard = ttk.Frame(self.root)
         self.admin_dashboard.pack(fill=tk.BOTH, expand=True)
 
-        tk.Label(self.admin_dashboard, text="Admin Dashboard", font=("Arial", 16)).pack(pady=20)
+        ttk.Label(self.admin_dashboard, text="Admin Dashboard", style='Header.TLabel').pack(pady=20)
 
-        tk.Button(self.admin_dashboard, text="View Sales Reports", command=self.view_sales_reports, width=25).pack(pady=10)
-        tk.Button(self.admin_dashboard, text="Manage Discounts", command=self.manage_discounts_frame, width=25).pack(pady=10)
-        tk.Button(self.admin_dashboard, text="Logout", command=self.create_welcome_frame, width=25).pack(pady=10)
+        ttk.Button(self.admin_dashboard, text="View Sales Reports", command=self.view_sales_reports, width=25).pack(pady=10)
+        ttk.Button(self.admin_dashboard, text="Manage Discounts", command=self.manage_discounts_frame, width=25).pack(pady=10)
+        ttk.Button(self.admin_dashboard, text="Logout", command=self.create_welcome_frame, width=25).pack(pady=10)
 
     def view_sales_reports(self):
+        """Display the sales reports for admin to view sales data."""
         self.clear_frames()
-        self.reports_frame = tk.Frame(self.root)
+        self.reports_frame = ttk.Frame(self.root)
         self.reports_frame.pack(fill=tk.BOTH, expand=True)
 
-        tk.Label(self.reports_frame, text="Sales Reports", font=("Arial", 16)).pack(pady=20)
+        ttk.Label(self.reports_frame, text="Sales Reports", style='Header.TLabel').pack(pady=20)
 
         if not sales_reports:
-            tk.Label(self.reports_frame, text="No sales reports available.").pack()
+            ttk.Label(self.reports_frame, text="No sales reports available.").pack()
         else:
-            reports_text = scrolledtext.ScrolledText(self.reports_frame, width=70, height=25)
-            reports_text.pack()
-            for report in sales_reports.values():
-                reports_text.insert(tk.END, str(report) + "\n")
-            reports_text.configure(state='disabled')
+            # Create a Treeview
+            columns = ('date', 'transaction_id', 'customer_name', 'ticket_type', 'quantity', 'total_price', 'date_of_purchase')
+            tree = ttk.Treeview(self.reports_frame, columns=columns, show='headings')
+            tree.pack(fill=tk.BOTH, expand=True)
 
-        tk.Button(self.reports_frame, text="Back", command=self.create_admin_dashboard).pack(pady=10)
+            tree.heading('date', text='Date')
+            tree.heading('transaction_id', text='Transaction ID')
+            tree.heading('customer_name', text='Customer Name')
+            tree.heading('ticket_type', text='Ticket Type')
+            tree.heading('quantity', text='Quantity')
+            tree.heading('total_price', text='Total Price')
+            tree.heading('date_of_purchase', text='Date of Purchase')
+
+            for report_date, report in sales_reports.items():
+                for transaction in report.transactions:
+                    tree.insert('', tk.END, values=(
+                        report_date,
+                        transaction.transaction_id,
+                        transaction.customer_name,
+                        transaction.ticket_type,
+                        transaction.quantity,
+                        transaction.total_price,
+                        transaction.date_of_purchase
+                    ))
+
+            # Add vertical scrollbar
+            scrollbar = ttk.Scrollbar(self.reports_frame, orient=tk.VERTICAL, command=tree.yview)
+            tree.configure(yscroll=scrollbar.set)
+            scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        ttk.Button(self.reports_frame, text="Back", command=self.create_admin_dashboard).pack(pady=10)
 
     def manage_discounts_frame(self):
+        """Display the discounts management frame for admin to manage discounts."""
         self.clear_frames()
-        self.manage_discounts_frame = tk.Frame(self.root)
+        self.manage_discounts_frame = ttk.Frame(self.root)
         self.manage_discounts_frame.pack(fill=tk.BOTH, expand=True)
 
-        tk.Label(self.manage_discounts_frame, text="Manage Discounts", font=("Arial", 16)).pack(pady=20)
+        ttk.Label(self.manage_discounts_frame, text="Manage Discounts", style='Header.TLabel').pack(pady=20)
 
-        tk.Label(self.manage_discounts_frame, text="Select Ticket Type:").pack(pady=5)
-        self.discount_ticket_var = tk.StringVar(self.manage_discounts_frame)
-        self.discount_ticket_var.set("Select Ticket")
+        ttk.Label(self.manage_discounts_frame, text="Select Ticket Type:").pack(pady=5)
         ticket_options = list(tickets.keys())
-        tk.OptionMenu(self.manage_discounts_frame, self.discount_ticket_var, *ticket_options).pack()
+        self.discount_ticket_var = tk.StringVar()
+        self.discount_ticket_combobox = ttk.Combobox(self.manage_discounts_frame, textvariable=self.discount_ticket_var, values=ticket_options, state='readonly')
+        self.discount_ticket_combobox.set("Select Ticket")
+        self.discount_ticket_combobox.pack()
 
-        tk.Label(self.manage_discounts_frame, text="Enter New Discount (e.g., 0.15 for 15%):").pack(pady=5)
-        self.new_discount_entry = tk.Entry(self.manage_discounts_frame)
+        ttk.Label(self.manage_discounts_frame, text="Enter New Discount (e.g., 0.15 for 15%):").pack(pady=5)
+        self.new_discount_entry = ttk.Entry(self.manage_discounts_frame)
         self.new_discount_entry.pack()
 
-        tk.Button(self.manage_discounts_frame, text="Update Discount", command=self.update_discount).pack(pady=10)
-        tk.Button(self.manage_discounts_frame, text="Back", command=self.create_admin_dashboard).pack()
+        ttk.Button(self.manage_discounts_frame, text="Update Discount", command=self.update_discount).pack(pady=10)
+        ttk.Button(self.manage_discounts_frame, text="Back", command=self.create_admin_dashboard).pack()
 
     def update_discount(self):
+        """Update the discount for the selected ticket type."""
         ticket_type = self.discount_ticket_var.get()
         discount_str = self.new_discount_entry.get()
 

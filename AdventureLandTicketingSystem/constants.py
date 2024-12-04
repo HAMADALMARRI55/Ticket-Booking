@@ -4,9 +4,9 @@ FILE_PATH_TICKETS = "data/tickets.pkl"
 FILE_PATH_SALES_REPORTS = "data/sales_reports.pkl"
 
 # Ticket discount constants
-DISCOUNT_ON_TWO_DAY_PASS = 0.10  # 10%
-DISCOUNT_ON_GROUP_TICKET = 0.20  # 20%
-DISCOUNT_ON_ANNUAL_RENEWAL = 0.15  # 15%
+DISCOUNT_ON_TWO_DAY_PASS = 0.10  
+DISCOUNT_ON_GROUP_TICKET = 0.20  
+DISCOUNT_ON_ANNUAL_RENEWAL = 0.15  
 
 # Ticket types and pricing
 TICKET_PRICES = {

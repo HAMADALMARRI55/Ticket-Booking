@@ -1,4 +1,14 @@
 class User:
+    """
+    Represents a user in the Adventure Land Theme Park Ticketing System.
+
+    Attributes:
+        user_id (str): Unique identifier for the user.
+        name (str): Name of the user.
+        email (str): Email address of the user.
+        password (str): Password for user authentication.
+        purchase_history (list): List of tickets purchased by the user.
+    """
     def __init__(self, user_id, name, email, password):
         """
         Initialize a User object with basic details.
